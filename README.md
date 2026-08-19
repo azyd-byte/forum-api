@@ -162,7 +162,7 @@ npm run lint
 
 ## Pengujian dengan Postman
 
-1. Downdoal <a href="https://github.com/dicodingacademy/a276-backend-expert-labs/raw/099-shared-content/shared-content/03-submission-content/01-Forum-API-V1/Forum%20API%20V1%20Test.zip" target="_blank" rel="noopener noreferrer"> Forum API V1 Postman Collection + Environment Test. </a>
+1. Download <a href="https://github.com/dicodingacademy/a276-backend-expert-labs/raw/099-shared-content/shared-content/03-submission-content/01-Forum-API-V1/Forum%20API%20V1%20Test.zip" target="_blank" rel="noopener noreferrer"> Forum API V1 Postman Collection + Environment Test. </a>
 2. Buka aplikasi **Postman**.
 3. Import file koleksi dan environment dari folder pengujian:
    - `Forum API V1 Test.postman_collection.json`
