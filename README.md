@@ -1,171 +1,182 @@
 # Forum API
 
-Backend RESTful API untuk aplikasi forum diskusi yang dibangun menggunakan arsitektur **Clean Architecture**, prinsip **Test-Driven Development (TDD)**, dan **Automated Testing** dengan Node.js dan PostgreSQL. Proyek submission untuk kelas **Menjadi Back-End Developer Expert dengan JavaScript** di Dicoding Academy.
+Backend RESTful API untuk aplikasi forum diskusi yang dibangun menggunakan arsitektur **Clean Architecture**, prinsip **Test-Driven Development (TDD)**, dan **Automated Testing** dengan **Node.js**, **Express.js**, dan **PostgreSQL**. Proyek submission untuk kelas **Menjadi Back-End Developer Expert dengan JavaScript** di Dicoding Academy.
 
 ---
 
-## Fitur
+## 🚀 Fitur & Endpoint API
 
-### 1. Autentikasi & Pengguna
-
-- Registrasi Pengguna (`POST /users`)
-- Login Pengguna (`POST /authentications`)
-- Memperbarui Access Token (`PUT /authentications`)
-- Logout Pengguna (`DELETE /authentications`)
+### 1. Pengguna (Users) & Autentikasi (Authentications)
+- `POST /users` — Registrasi akun pengguna baru
+- `POST /authentications` — Login pengguna dan mendapatkan *Access Token* & *Refresh Token*
+- `PUT /authentications` — Memperbarui *Access Token* menggunakan *Refresh Token*
+- `DELETE /authentications` — Menghapus *Refresh Token* (Logout)
 
 ### 2. Threads
-
-- Menambahkan Thread baru (`POST /threads`) — _membutuhkan autentikasi_
-- Melihat Detail Thread beserta komentar & balasan terformat (`GET /threads/{threadId}`) — _publik_
+- `POST /threads` — Membuat thread diskusi baru *(Membutuhkan Autentikasi)*
+- `GET /threads/{threadId}` — Melihat detail thread lengkap beserta daftar komentar dan balasannya *(Publik)*
 
 ### 3. Komentar (Comments)
+- `POST /threads/{threadId}/comments` — Menambahkan komentar pada thread *(Membutuhkan Autentikasi)*
+- `DELETE /threads/{threadId}/comments/{commentId}` — Menghapus komentar dengan metode *soft delete* *(Hanya pemilik komentar)*
 
-- Menambahkan Komentar pada Thread (`POST /threads/{threadId}/comments`) — _membutuhkan autentikasi_
-- Menghapus Komentar dengan Soft Delete (`DELETE /threads/{threadId}/comments/{commentId}`) — _hanya oleh pemilik komentar_
-
-### 4. Balasan Komentar (Replies) (Fitur Opsional)
-
-- Menambahkan Balasan pada Komentar (`POST /threads/{threadId}/comments/{commentId}/replies`) — _membutuhkan autentikasi_
-- Menghapus Balasan dengan Soft Delete (`DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}`) — _hanya oleh pemilik balasan_
+### 4. Balasan Komentar (Replies) *(Kriteria Opsional)*
+- `POST /threads/{threadId}/comments/{commentId}/replies` — Menambahkan balasan pada komentar *(Membutuhkan Autentikasi)*
+- `DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}` — Menghapus balasan dengan metode *soft delete* *(Hanya pemilik balasan)*
 
 ---
 
-## Arsitektur Proyek (Clean Architecture)
+## 🏛️ Arsitektur Proyek (Clean Architecture)
 
-Struktur proyek dibagi menjadi 4 layer utama yang terisolasi dengan Dependency Injection Container:
+Proyek ini mengadopsi prinsip **Clean Architecture** (Uncle Bob) yang membagi kode menjadi 4 layer terpisah untuk menjaga *Separation of Concerns* (SoC) dan memudahkan pengujian:
 
 ```
 src/
-├── Applications/            # Layer Bisnis / Use Cases & Security Interface
-│   ├── security/            # Abstraksi enkripsi & token manager
-│   └── use_case/            # Implementasi orchestrator alur logika aplikasi
+├── Applications/            # Layer Bisnis / Use Cases & Interface Security
+│   ├── security/            # Abstraksi enkripsi password & token manager
+│   └── use_case/            # Orchestrator logika bisnis aplikasi
 ├── Commons/                 # Helper, Exceptions, DomainErrorTranslator, Config
-│   └── exceptions/          # ClientError, InvariantError, NotFoundError, dll.
+│   ├── config.js
+│   └── exceptions/          # ClientError, InvariantError, NotFoundError, AuthorizationError, dll.
 ├── Domains/                 # Layer Entitas Bisnis & Repository Interface
 │   ├── authentications/
 │   ├── comments/
 │   ├── replies/
 │   ├── threads/
 │   └── users/
-├── Infrastructures/         # Layer Frameworks & Drivers (PostgreSQL, Express, JWT, Bcrypt)
-│   ├── database/postgres/   # Database connection pool
-│   ├── http/                # Server setup & Global Error Handler
+├── Infrastructures/         # Layer Frameworks & Drivers
+│   ├── database/postgres/   # Pool koneksi PostgreSQL
+│   ├── http/                # Express Server setup & Global Error Handler
 │   ├── repository/          # Implementasi konkret Repository PostgreSQL
 │   └── security/            # Implementasi konkret Bcrypt & JWT Manager
-└── Interfaces/              # Layer Interface Adapters / Delivery Mechanism (REST API)
-    └── http/api/            # Handlers & Routers per resource
+└── Interfaces/              # Layer Delivery Mechanism (REST API)
+    └── http/api/            # Routes & Handlers per endpoint
 ```
 
 ---
 
-## Persyaratan Sistem
+## 🛠️ Teknologi & Dependensi
 
-- Node.js (v18.x atau lebih baru)
-- PostgreSQL (v14.x atau lebih baru)
+- **Runtime & Framework:** Node.js (ES Module), Express.js
+- **Database:** PostgreSQL, `node-pg-migrate`, `pg`
+- **Security:** `bcrypt`, `jsonwebtoken`
+- **Dependency Injection:** `instances-container`
+- **Testing & Quality:** `vitest`, `supertest`, `@vitest/coverage-v8`, `eslint`
 
 ---
 
-## Panduan Memulai
+## 📋 Persyaratan Sistem
 
-### 1. Kloning & Instalasi Dependensi
+- **Node.js:** v18.x atau lebih baru
+- **PostgreSQL:** v14.x atau lebih baru
+- **npm:** v9.x atau lebih baru
+
+---
+
+## ⚡ Panduan Menjalankan Aplikasi
+
+### 1. Instalasi Dependensi
 
 ```bash
 npm install
 ```
 
-### 2. Konfigurasi Environment
+### 2. Konfigurasi Environment Variable
 
-Salin berkas konfigurasi environment dan sesuaikan kredensial database PostgreSQL Anda:
+Buat dua berkas konfigurasi environment di root project:
 
-- Buat file `.env` untuk server aplikasi:
+1. **`.env`** (untuk environment development & production):
+   ```env
+   # HTTP SERVER
+   HOST=localhost
+   PORT=5000
 
-  ```env
-  # HTTP SERVER
-  HOST=localhost
-  PORT=5000
+   # POSTGRES
+   PGHOST=localhost
+   PGUSER=postgres
+   PGDATABASE=forumapi
+   PGPASSWORD=postgres
+   PGPORT=5432
 
-  # POSTGRES
-  PGHOST=localhost
-  PGUSER=your_postgres_user
-  PGDATABASE=forumapi
-  PGPASSWORD=your_postgres_password
-  PGPORT=5432
+   # TOKENIZE
+   ACCESS_TOKEN_KEY=your_access_token_secret_key
+   REFRESH_TOKEN_KEY=your_refresh_token_secret_key
+   ACCESS_TOKEN_AGE=3000
+   ```
 
-  # TOKENIZE
-  ACCESS_TOKEN_KEY=your_access_token_secret_key
-  REFRESH_TOKEN_KEY=your_refresh_token_secret_key
-  ACCESS_TOKEN_AGE=3000
-  ```
+2. **`.test.env`** (khusus untuk automated testing):
+   ```env
+   # HTTP SERVER
+   HOST=localhost
+   PORT=5000
 
-- Buat file `.test.env` untuk automated testing:
+   # POSTGRES
+   PGHOST=localhost
+   PGUSER=postgres
+   PGDATABASE=forumapi_test
+   PGPASSWORD=postgres
+   PGPORT=5432
 
-  ```env
-  # HTTP SERVER
-  HOST=localhost
-  PORT=5000
+   # TOKENIZE
+   ACCESS_TOKEN_KEY=your_access_token_secret_key
+   REFRESH_TOKEN_KEY=your_refresh_token_secret_key
+   ACCESS_TOKEN_AGE=3000
+   ```
 
-  # POSTGRES
-  PGHOST=localhost
-  PGUSER=your_postgres_user
-  PGDATABASE=forumapi_test
-  PGPASSWORD=your_postgres_password
-  PGPORT=5432
-
-  # TOKENIZE
-  ACCESS_TOKEN_KEY=your_access_token_secret_key
-  REFRESH_TOKEN_KEY=your_refresh_token_secret_key
-  ACCESS_TOKEN_AGE=3000
-  ```
+> **Catatan:** Pastikan kedua database (`forumapi` dan `forumapi_test`) sudah dibuat di PostgreSQL Anda.
 
 ### 3. Menjalankan Database Migration
 
-Jalankan migrasi pada database utama dan database testing:
+Jalankan migrasi tabel ke database development dan testing:
 
 ```bash
 # Migrasi database utama (forumapi)
 npm run migrate
 
-# Migrasi database pengujian (forumapi_test)
+# Migrasi database testing (forumapi_test)
 npm run migrate:test
 ```
 
 ### 4. Menjalankan Server
 
 ```bash
-# Mode development (live-reload dengan nodemon)
+# Menjalankan dalam mode development (live reload dengan nodemon)
 npm run start:dev
 
-# Mode production
+# Menjalankan dalam mode production
 npm start
 ```
 
-Server akan aktif di `http://localhost:5000`.
+Server akan aktif dan berjalan di `http://localhost:5000`.
 
 ---
 
-## Pengujian (Testing)
+## 🧪 Pengujian (Testing) & Code Quality
 
-Proyek ini dilengkapi dengan **100% Test Coverage** yang mencakup Unit Test, Integration Test, dan Functional Test (HTTP Server):
+Proyek ini dibangun menggunakan pendekatan **Test-Driven Development (TDD)** dengan cakupan pengujian unit, integration, dan functional testing:
 
 ```bash
 # Menjalankan seluruh automation test
 npm test
 
-# Menjalankan test coverage report
+# Menjalankan automation test dalam mode watch
+npm run test:watch
+
+# Melihat laporan code coverage
 npm run test:coverage
 
-# Memeriksa kepatuhan code style dengan ESLint (0 errors, 0 warnings)
+# Memeriksa standard kode dengan ESLint
 npm run lint
 ```
 
 ---
 
-## Pengujian dengan Postman
+## 📬 Pengujian dengan Postman
 
-1. Download <a href="https://github.com/dicodingacademy/a276-backend-expert-labs/raw/099-shared-content/shared-content/03-submission-content/01-Forum-API-V1/Forum%20API%20V1%20Test.zip" target="_blank" rel="noopener noreferrer"> Forum API V1 Postman Collection + Environment Test. </a>
-2. Buka aplikasi **Postman**.
-3. Import file koleksi dan environment dari folder pengujian:
+1. Buka aplikasi **Postman**.
+2. Import koleksi dan environment dari folder pengujian (misalnya folder `Forum API V1 Test`):
    - `Forum API V1 Test.postman_collection.json`
    - `Forum API V1 Test.postman_environment.json`
-4. Pilih environment **Forum API V1 Test**.
-5. Jalankan **Collection Runner** pada koleksi tersebut. Seluruh skenario pengujian akan lolos (_Pass_).
+3. Pilih environment **Forum API V1 Test**.
+4. Jalankan pengujian menggunakan **Collection Runner**. Seluruh skenario pengujian akan lolos (*Pass*).
+

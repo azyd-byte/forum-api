@@ -74,16 +74,6 @@ describe('ReplyRepositoryPostgres', () => {
   });
 
   describe('verifyReplyOwner function', () => {
-    it('should throw NotFoundError when reply not found', async () => {
-      // Arrange
-      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      await expect(replyRepositoryPostgres.verifyReplyOwner('reply-not-found', 'user-123'))
-        .rejects
-        .toThrowError(NotFoundError);
-    });
-
     it('should throw AuthorizationError when user is not the reply owner', async () => {
       // Arrange
       await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });

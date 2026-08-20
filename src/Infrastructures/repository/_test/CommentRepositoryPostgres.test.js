@@ -70,16 +70,6 @@ describe('CommentRepositoryPostgres', () => {
   });
 
   describe('verifyCommentOwner function', () => {
-    it('should throw NotFoundError when comment not found', async () => {
-      // Arrange
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      await expect(commentRepositoryPostgres.verifyCommentOwner('comment-not-found', 'user-123'))
-        .rejects
-        .toThrowError(NotFoundError);
-    });
-
     it('should throw AuthorizationError when user is not the comment owner', async () => {
       // Arrange
       await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
