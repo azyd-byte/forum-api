@@ -7,28 +7,32 @@ Backend RESTful API untuk aplikasi forum diskusi yang dibangun menggunakan arsit
 ## 🚀 Fitur & Endpoint API
 
 ### 1. Pengguna (Users) & Autentikasi (Authentications)
+
 - `POST /users` — Registrasi akun pengguna baru
-- `POST /authentications` — Login pengguna dan mendapatkan *Access Token* & *Refresh Token*
-- `PUT /authentications` — Memperbarui *Access Token* menggunakan *Refresh Token*
-- `DELETE /authentications` — Menghapus *Refresh Token* (Logout)
+- `POST /authentications` — Login pengguna dan mendapatkan _Access Token_ & _Refresh Token_
+- `PUT /authentications` — Memperbarui _Access Token_ menggunakan _Refresh Token_
+- `DELETE /authentications` — Menghapus _Refresh Token_ (Logout)
 
 ### 2. Threads
-- `POST /threads` — Membuat thread diskusi baru *(Membutuhkan Autentikasi)*
-- `GET /threads/{threadId}` — Melihat detail thread lengkap beserta daftar komentar dan balasannya *(Publik)*
+
+- `POST /threads` — Membuat thread diskusi baru _(Membutuhkan Autentikasi)_
+- `GET /threads/{threadId}` — Melihat detail thread lengkap beserta daftar komentar dan balasannya _(Publik)_
 
 ### 3. Komentar (Comments)
-- `POST /threads/{threadId}/comments` — Menambahkan komentar pada thread *(Membutuhkan Autentikasi)*
-- `DELETE /threads/{threadId}/comments/{commentId}` — Menghapus komentar dengan metode *soft delete* *(Hanya pemilik komentar)*
 
-### 4. Balasan Komentar (Replies) *(Kriteria Opsional)*
-- `POST /threads/{threadId}/comments/{commentId}/replies` — Menambahkan balasan pada komentar *(Membutuhkan Autentikasi)*
-- `DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}` — Menghapus balasan dengan metode *soft delete* *(Hanya pemilik balasan)*
+- `POST /threads/{threadId}/comments` — Menambahkan komentar pada thread _(Membutuhkan Autentikasi)_
+- `DELETE /threads/{threadId}/comments/{commentId}` — Menghapus komentar dengan metode _soft delete_ _(Hanya pemilik komentar)_
+
+### 4. Balasan Komentar (Replies) _(Kriteria Opsional)_
+
+- `POST /threads/{threadId}/comments/{commentId}/replies` — Menambahkan balasan pada komentar _(Membutuhkan Autentikasi)_
+- `DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}` — Menghapus balasan dengan metode _soft delete_ _(Hanya pemilik balasan)_
 
 ---
 
 ## 🏛️ Arsitektur Proyek (Clean Architecture)
 
-Proyek ini mengadopsi prinsip **Clean Architecture** (Uncle Bob) yang membagi kode menjadi 4 layer terpisah untuk menjaga *Separation of Concerns* (SoC) dan memudahkan pengujian:
+Proyek ini mengadopsi prinsip **Clean Architecture** (Uncle Bob) yang membagi kode menjadi 4 layer terpisah untuk menjaga _Separation of Concerns_ (SoC) dan memudahkan pengujian:
 
 ```
 src/
@@ -86,6 +90,7 @@ npm install
 Buat dua berkas konfigurasi environment di root project:
 
 1. **`.env`** (untuk environment development & production):
+
    ```env
    # HTTP SERVER
    HOST=localhost
@@ -105,6 +110,7 @@ Buat dua berkas konfigurasi environment di root project:
    ```
 
 2. **`.test.env`** (khusus untuk automated testing):
+
    ```env
    # HTTP SERVER
    HOST=localhost
@@ -173,10 +179,10 @@ npm run lint
 
 ## 📬 Pengujian dengan Postman
 
-1. Buka aplikasi **Postman**.
-2. Import koleksi dan environment dari folder pengujian (misalnya folder `Forum API V1 Test`):
+1. Download <a href="https://github.com/dicodingacademy/a276-backend-expert-labs/raw/099-shared-content/shared-content/03-submission-content/01-Forum-API-V1/Forum%20API%20V1%20Test.zip" target="_blank" rel="noopener noreferrer"> Forum API V1 Postman Collection + Environment Test. </a>
+2. Buka aplikasi **Postman**.
+3. Import file koleksi dan environment dari folder pengujian:
    - `Forum API V1 Test.postman_collection.json`
    - `Forum API V1 Test.postman_environment.json`
-3. Pilih environment **Forum API V1 Test**.
-4. Jalankan pengujian menggunakan **Collection Runner**. Seluruh skenario pengujian akan lolos (*Pass*).
-
+4. Pilih environment **Forum API V1 Test**.
+5. Jalankan **Collection Runner** pada koleksi tersebut. Seluruh skenario pengujian akan lolos (_Pass_).
