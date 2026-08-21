@@ -43,6 +43,12 @@ jobs:
 
       - name: Run Database Migrations
         env:
+          DATABASE_URL: postgres://postgres:secret_password@localhost:5432/forumapi_test
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: secret_password
+          PGDATABASE: forumapi_test
           PGHOST_TEST: localhost
           PGPORT_TEST: 5432
           PGUSER_TEST: postgres
@@ -52,6 +58,12 @@ jobs:
 
       - name: Run Automated Tests with Coverage
         env:
+          DATABASE_URL: postgres://postgres:secret_password@localhost:5432/forumapi_test
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: secret_password
+          PGDATABASE: forumapi_test
           PGHOST_TEST: localhost
           PGPORT_TEST: 5432
           PGUSER_TEST: postgres
@@ -61,3 +73,4 @@ jobs:
           REFRESH_TOKEN_KEY: secret_refresh_token_key
           ACCESS_TOKEN_AGE: 1800
         run: npm run test:coverage
+
