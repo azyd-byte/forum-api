@@ -1,7 +1,9 @@
-import ClientError from "../ClientError.js";
+import ClientError from '../ClientError.js';
 
-describe("ClientError", () => {
-  it("should throw error when directly use it", () => {
-    expect(() => new ClientError("")).toThrowError("sengaja dibuat gagal");
+describe('ClientError', () => {
+  it('should throw error when directly use it', () => {
+    expect(() => new ClientError('')).toThrowError(
+      'cannot instantiate abstract class',
+    );
   });
 });
