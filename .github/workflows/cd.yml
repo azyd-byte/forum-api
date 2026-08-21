@@ -1,0 +1,26 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH and Deploy to VPS Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd ~/forum-api || cd /var/www/forum-api
+            git pull origin main || git pull origin master
+            npm ci --production
+            npm run migrate
+            pm2 restart forum-api || pm2 start src/app.js --name forum-api

@@ -1,5 +1,6 @@
 import AddCommentUseCase from '../../../../Applications/use_case/AddCommentUseCase.js';
 import DeleteCommentUseCase from '../../../../Applications/use_case/DeleteCommentUseCase.js';
+import ToggleLikeCommentUseCase from '../../../../Applications/use_case/ToggleLikeCommentUseCase.js';
 import AuthenticationTokenManager from '../../../../Applications/security/AuthenticationTokenManager.js';
 import AuthenticationError from '../../../../Commons/exceptions/AuthenticationError.js';
 
@@ -9,6 +10,7 @@ class CommentsHandler {
 
     this.postCommentHandler = this.postCommentHandler.bind(this);
     this.deleteCommentHandler = this.deleteCommentHandler.bind(this);
+    this.putLikeCommentHandler = this.putLikeCommentHandler.bind(this);
   }
 
   async postCommentHandler(req, res, next) {
@@ -61,6 +63,31 @@ class CommentsHandler {
       next(error);
     }
   }
+
+  async putLikeCommentHandler(req, res, next) {
+    try {
+      const headerAuth = req.headers.authorization;
+      if (!headerAuth || !headerAuth.startsWith('Bearer ')) {
+        throw new AuthenticationError('Missing authentication');
+      }
+
+      const token = headerAuth.replace('Bearer ', '');
+      const authenticationTokenManager = this._container.getInstance(AuthenticationTokenManager.name);
+      await authenticationTokenManager.verifyAccessToken(token);
+      const { id: userId } = await authenticationTokenManager.decodePayload(token);
+
+      const { threadId, commentId } = req.params;
+      const toggleLikeCommentUseCase = this._container.getInstance(ToggleLikeCommentUseCase.name);
+      await toggleLikeCommentUseCase.execute(threadId, commentId, userId);
+
+      res.status(200).json({
+        status: 'success',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default CommentsHandler;
+

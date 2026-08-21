@@ -5,6 +5,7 @@ import ThreadsTableTestHelper from '../../../../tests/ThreadsTableTestHelper.js'
 import CommentsTableTestHelper from '../../../../tests/CommentsTableTestHelper.js';
 import RepliesTableTestHelper from '../../../../tests/RepliesTableTestHelper.js';
 import AuthenticationsTableTestHelper from '../../../../tests/AuthenticationsTableTestHelper.js';
+import UserCommentLikesTableTestHelper from '../../../../tests/UserCommentLikesTableTestHelper.js';
 import container from '../../container.js';
 import createServer from '../createServer.js';
 import AuthenticationTokenManager from '../../../Applications/security/AuthenticationTokenManager.js';
@@ -15,6 +16,7 @@ describe('/threads endpoint', () => {
   });
 
   afterEach(async () => {
+    await UserCommentLikesTableTestHelper.cleanTable();
     await RepliesTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
@@ -144,6 +146,11 @@ describe('/threads endpoint', () => {
         date: '2021-08-08T07:26:21.338Z',
         isDelete: true,
       });
+      await UserCommentLikesTableTestHelper.addLike({
+        id: 'like-1',
+        userId: 'user-123',
+        commentId: 'comment-1',
+      });
       await RepliesTableTestHelper.addReply({
         id: 'reply-1',
         commentId: 'comment-1',
@@ -181,6 +188,7 @@ describe('/threads endpoint', () => {
       expect(firstComment.id).toEqual('comment-1');
       expect(firstComment.username).toEqual('johndoe');
       expect(firstComment.content).toEqual('sebuah comment');
+      expect(firstComment.likeCount).toEqual(1);
       expect(firstComment.replies).toHaveLength(2);
       expect(firstComment.replies[0].id).toEqual('reply-1');
       expect(firstComment.replies[0].content).toEqual('**balasan telah dihapus**');
@@ -194,6 +202,7 @@ describe('/threads endpoint', () => {
       expect(secondComment.id).toEqual('comment-2');
       expect(secondComment.username).toEqual('dicoding');
       expect(secondComment.content).toEqual('**komentar telah dihapus**');
+      expect(secondComment.likeCount).toEqual(0);
       expect(secondComment.replies).toEqual([]);
     });
 
@@ -211,3 +220,4 @@ describe('/threads endpoint', () => {
     });
   });
 });
+

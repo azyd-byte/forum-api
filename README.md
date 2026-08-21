@@ -28,6 +28,11 @@ Backend RESTful API untuk aplikasi forum diskusi yang dibangun menggunakan arsit
 - `POST /threads/{threadId}/comments/{commentId}/replies` — Menambahkan balasan pada komentar _(Membutuhkan Autentikasi)_
 - `DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}` — Menghapus balasan dengan metode _soft delete_ _(Hanya pemilik balasan)_
 
+### 5. Menyukai & Batal Menyukai Komentar (Likes) _(Kriteria Opsional)_
+
+- `PUT /threads/{threadId}/comments/{commentId}/likes` — Toggle suka/batal suka pada komentar _(Membutuhkan Autentikasi)_
+
+
 ---
 
 ## 🏛️ Arsitektur Proyek (Clean Architecture)
@@ -159,7 +164,7 @@ Server akan aktif dan berjalan di `http://localhost:5000`.
 
 ## 🧪 Pengujian (Testing) & Code Quality
 
-Proyek ini dibangun menggunakan pendekatan **Test-Driven Development (TDD)** dengan cakupan pengujian unit, integration, dan functional testing:
+Proyek ini dibangun menggunakan pendekatan **Test-Driven Development (TDD)** dengan cakupan pengujian unit, integration, dan functional testing (100% Test Coverage):
 
 ```bash
 # Menjalankan seluruh automation test
@@ -168,21 +173,40 @@ npm test
 # Menjalankan automation test dalam mode watch
 npm run test:watch
 
-# Melihat laporan code coverage
+# Melihat laporan code coverage (100% Coverage)
 npm run test:coverage
 
-# Memeriksa standard kode dengan ESLint
+# Memeriksa standar kode dengan ESLint
 npm run lint
 ```
 
 ---
 
-## 📬 Pengujian dengan Postman
+## 🔒 Keamanan & Limit Access (NGINX)
 
-1. Download <a href="https://github.com/dicodingacademy/a276-backend-expert-labs/raw/099-shared-content/shared-content/03-submission-content/01-Forum-API-V1/Forum%20API%20V1%20Test.zip" target="_blank" rel="noopener noreferrer"> Forum API V1 Postman Collection + Environment Test. </a>
-2. Buka aplikasi **Postman**.
-3. Import file koleksi dan environment dari folder pengujian:
-   - `Forum API V1 Test.postman_collection.json`
-   - `Forum API V1 Test.postman_environment.json`
-4. Pilih environment **Forum API V1 Test**.
-5. Jalankan **Collection Runner** pada koleksi tersebut. Seluruh skenario pengujian akan lolos (_Pass_).
+Proyek ini mengimplementasikan reverse proxy dan rate limiting menggunakan **NGINX**:
+- **Rate Limit:** 90 request per menit khusus pada resource `/threads` dan sub-path di dalamnya guna mencegah serangan *Denial of Service (DoS/DDoS)*.
+- **HTTPS & SSL:** Menggunakan sertifikat SSL/TLS via Let's Encrypt (Certbot) untuk mencegah serangan *Man-in-the-Middle (MITM)*.
+- File konfigurasi NGINX terlampir pada root proyek: `nginx.conf`.
+
+---
+
+## 🔄 CI/CD (Continuous Integration & Continuous Deployment)
+
+- **Continuous Integration (GitHub Actions):** Otomatis berjalan pada event *Pull Request* ke branch `main`/`master` untuk menjalankan linting, migrasi database dengan PostgreSQL service container, dan 100% automated tests.
+- **Continuous Deployment (GitHub Actions):** Otomatis mendeploy kode ke VPS via SSH pada event *Push* ke branch `main`/`master`.
+
+---
+
+## 📬 Pengujian dengan Postman V2
+
+1. Buka aplikasi **Postman**.
+2. Import berkas koleksi dan environment dari folder `Forum API V2 Test`:
+   - `Forum API V2 Test.postman_collection.json`
+   - `Forum API V2 Test.postman_environment.json`
+3. Pilih environment **Forum API V2 Test**, lalu sesuaikan variabel:
+   - `protocol`: `https`
+   - `host`: `forumapi-dicoding-zayadi.duckdns.org`
+   - `port`: `443`
+4. Jalankan **Collection Runner** pada koleksi tersebut. Seluruh skenario pengujian wajib lolos (_Pass_).
+

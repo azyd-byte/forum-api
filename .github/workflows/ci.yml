@@ -1,0 +1,63 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: secret_password
+          POSTGRES_DB: forumapi_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js v22 (LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Database Migrations
+        env:
+          PGHOST_TEST: localhost
+          PGPORT_TEST: 5432
+          PGUSER_TEST: postgres
+          PGPASSWORD_TEST: secret_password
+          PGDATABASE_TEST: forumapi_test
+        run: npm run migrate:test
+
+      - name: Run Automated Tests with Coverage
+        env:
+          PGHOST_TEST: localhost
+          PGPORT_TEST: 5432
+          PGUSER_TEST: postgres
+          PGPASSWORD_TEST: secret_password
+          PGDATABASE_TEST: forumapi_test
+          ACCESS_TOKEN_KEY: secret_access_token_key
+          REFRESH_TOKEN_KEY: secret_refresh_token_key
+          ACCESS_TOKEN_AGE: 1800
+        run: npm run test:coverage

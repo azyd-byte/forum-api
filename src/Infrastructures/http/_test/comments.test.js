@@ -8,12 +8,15 @@ import container from '../../container.js';
 import createServer from '../createServer.js';
 import AuthenticationTokenManager from '../../../Applications/security/AuthenticationTokenManager.js';
 
+import UserCommentLikesTableTestHelper from '../../../../tests/UserCommentLikesTableTestHelper.js';
+
 describe('/threads/{threadId}/comments endpoint', () => {
   afterAll(async () => {
     await pool.end();
   });
 
   afterEach(async () => {
+    await UserCommentLikesTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
@@ -241,4 +244,121 @@ describe('/threads/{threadId}/comments endpoint', () => {
       expect(response.body.message).toBeDefined();
     });
   });
+
+  describe('when PUT /threads/{threadId}/comments/{commentId}/likes', () => {
+    it('should response 200 and like comment when not liked yet', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123', owner: 'user-123' });
+      const tokenManager = container.getInstance(AuthenticationTokenManager.name);
+      const accessToken = await tokenManager.createAccessToken({ username: 'dicoding', id: 'user-123' });
+
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app)
+        .put('/threads/thread-123/comments/comment-123/likes')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(200);
+      expect(response.body.status).toEqual('success');
+
+      const likes = await UserCommentLikesTableTestHelper.findLike({
+        userId: 'user-123',
+        commentId: 'comment-123',
+      });
+      expect(likes).toHaveLength(1);
+    });
+
+    it('should response 200 and unlike comment when already liked', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123', owner: 'user-123' });
+      await UserCommentLikesTableTestHelper.addLike({
+        id: 'like-123',
+        userId: 'user-123',
+        commentId: 'comment-123',
+      });
+      const tokenManager = container.getInstance(AuthenticationTokenManager.name);
+      const accessToken = await tokenManager.createAccessToken({ username: 'dicoding', id: 'user-123' });
+
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app)
+        .put('/threads/thread-123/comments/comment-123/likes')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(200);
+      expect(response.body.status).toEqual('success');
+
+      const likes = await UserCommentLikesTableTestHelper.findLike({
+        userId: 'user-123',
+        commentId: 'comment-123',
+      });
+      expect(likes).toHaveLength(0);
+    });
+
+    it('should response 401 when request without authentication', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123', owner: 'user-123' });
+
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app)
+        .put('/threads/thread-123/comments/comment-123/likes');
+
+      // Assert
+      expect(response.status).toEqual(401);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('Missing authentication');
+    });
+
+    it('should response 404 when thread not found', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
+      const tokenManager = container.getInstance(AuthenticationTokenManager.name);
+      const accessToken = await tokenManager.createAccessToken({ username: 'dicoding', id: 'user-123' });
+
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app)
+        .put('/threads/thread-not-found/comments/comment-123/likes')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(404);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toBeDefined();
+    });
+
+    it('should response 404 when comment not found', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123' });
+      const tokenManager = container.getInstance(AuthenticationTokenManager.name);
+      const accessToken = await tokenManager.createAccessToken({ username: 'dicoding', id: 'user-123' });
+
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app)
+        .put('/threads/thread-123/comments/comment-not-found/likes')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(404);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toBeDefined();
+    });
+  });
 });
+

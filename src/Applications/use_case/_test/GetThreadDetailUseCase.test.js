@@ -1,12 +1,13 @@
 /* eslint-disable camelcase */
-import { vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import ThreadRepository from '../../../Domains/threads/ThreadRepository.js';
 import CommentRepository from '../../../Domains/comments/CommentRepository.js';
 import ReplyRepository from '../../../Domains/replies/ReplyRepository.js';
+import LikeRepository from '../../../Domains/likes/LikeRepository.js';
 import GetThreadDetailUseCase from '../GetThreadDetailUseCase.js';
 
 describe('GetThreadDetailUseCase', () => {
-  it('should orchestrating the get thread detail action correctly', async () => {
+  it('should orchestrating the get thread detail action correctly with like counts', async () => {
     // Arrange
     const threadId = 'thread-123';
     const mockThread = {
@@ -53,10 +54,18 @@ describe('GetThreadDetailUseCase', () => {
       },
     ];
 
+    const mockLikeCounts = [
+      {
+        comment_id: 'comment-1',
+        like_count: '2',
+      },
+    ];
+
     /** creating dependency of use case */
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     /** mocking needed function */
     mockThreadRepository.getThreadById = vi.fn()
@@ -65,12 +74,15 @@ describe('GetThreadDetailUseCase', () => {
       .mockImplementation(() => Promise.resolve(mockComments));
     mockReplyRepository.getRepliesByThreadId = vi.fn()
       .mockImplementation(() => Promise.resolve(mockReplies));
+    mockLikeRepository.getLikeCountsByThreadId = vi.fn()
+      .mockImplementation(() => Promise.resolve(mockLikeCounts));
 
     /** creating use case instance */
     const getThreadDetailUseCase = new GetThreadDetailUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -89,6 +101,7 @@ describe('GetThreadDetailUseCase', () => {
           username: 'johndoe',
           date: '2021-08-08T07:22:33.555Z',
           content: 'sebuah comment',
+          likeCount: 2,
           replies: [
             {
               id: 'reply-1',
@@ -109,13 +122,15 @@ describe('GetThreadDetailUseCase', () => {
           username: 'dicoding',
           date: '2021-08-08T07:26:21.338Z',
           content: '**komentar telah dihapus**',
+          likeCount: 0,
           replies: [],
         },
       ],
     });
 
-    expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
-    expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(threadId);
-    expect(mockReplyRepository.getRepliesByThreadId).toBeCalledWith(threadId);
+    expect(mockThreadRepository.getThreadById).toHaveBeenCalledWith(threadId);
+    expect(mockCommentRepository.getCommentsByThreadId).toHaveBeenCalledWith(threadId);
+    expect(mockReplyRepository.getRepliesByThreadId).toHaveBeenCalledWith(threadId);
+    expect(mockLikeRepository.getLikeCountsByThreadId).toHaveBeenCalledWith(threadId);
   });
 });
