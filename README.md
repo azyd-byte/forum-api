@@ -200,13 +200,15 @@ Proyek ini mengimplementasikan reverse proxy dan rate limiting menggunakan **NGI
 
 ## 📬 Pengujian dengan Postman V2
 
-1. Buka aplikasi **Postman**.
-2. Import berkas koleksi dan environment dari folder `Forum API V2 Test`:
+1. Unduh berkas koleksi & environment Postman:
+   - [Forum API V2 Postman Collection + Environment Test](https://github.com/dicodingacademy/a276-backend-expert-labs/raw/099-shared-content/shared-content/03-submission-content/02-Forum-API-V2/Forum%20API%20V2%20Test.zip)
+2. Buka aplikasi **Postman**.
+3. Import berkas koleksi dan environment:
    - `Forum API V2 Test.postman_collection.json`
    - `Forum API V2 Test.postman_environment.json`
-3. Pilih environment **Forum API V2 Test**, lalu sesuaikan variabel:
+4. Pilih environment **Forum API V2 Test**, lalu sesuaikan variabel:
    - `protocol`: `https`
    - `host`: `forumapi-dicoding-zayadi.duckdns.org`
    - `port`: `443`
-4. Jalankan **Collection Runner** pada koleksi tersebut. Seluruh skenario pengujian wajib lolos (_Pass_).
+5. Jalankan **Collection Runner** pada koleksi tersebut. Seluruh skenario pengujian wajib lolos (*Pass*).
 
